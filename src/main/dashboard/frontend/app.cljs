@@ -6,10 +6,8 @@
   [:p "Hi, I am " name])
 
 (defn childcaller []
-  [child "Foo Bar"])
+  [child "Hello World ss"])
 
 (defn init []
-  (println "Hello World")
-
   (rd/render [childcaller]
-             (.-body js/document)))
+             (.getElementById js/document "app")))
