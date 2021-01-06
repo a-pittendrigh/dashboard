@@ -2,12 +2,23 @@
   (:require [reagent.core :as r]
             [reagent.dom :as rd]))
 
-(defn child [name]
-  [:p "Hi, I am " name])
+(defn login []
+  [:div
 
-(defn childcaller []
-  [child "Hello World ss"])
+   [:div.field
+    [:label.label "API Key"]]
+
+   [:div.field
+    [:div.control
+    [:input.input {:type "text"}]]]
+
+   [:div.field
+    [:div.control
+     [:a.button.is-primary "Login"]]]])
+
+(defn layout []
+  [:div.container
+   [login]])
 
 (defn init []
-  (rd/render [childcaller]
-             (.getElementById js/document "app")))
+  (rd/render [layout] (.getElementById js/document "app")))
