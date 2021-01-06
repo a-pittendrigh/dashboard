@@ -17,7 +17,8 @@
 (defonce state (r/atom {}))
 
 (defn set-api-key [key]
-  (swap! state assoc :api-key key))
+  (swap! state assoc :api-key key)
+  (.setItem js/localStorage "api-key" key))
 
 (defn with-api-key [url]
   (str url "&key=" (:api-key @state)))
@@ -31,9 +32,15 @@
                                      ;;  :query-params {"since" 135}
                                      }
                                    ))]
-        (when (ok? response)
-          (swap! state assoc :dashboard (:body response))
-          (rfe/replace-state ::dashboard)))))
+        (if (ok? response)
+          (do
+            (prn "login successful")
+            (swap! state assoc :dashboard (:body response))
+            (swap! state assoc :login-error nil)
+            (rfe/replace-state ::dashboard))
+          (do
+            (swap! state assoc :login-error "API Key invalid")
+            (set-api-key nil))))))
 
 (defn login []
   (let [url (with-api-key "https://api.torn.com/user/?selections=bars,profile")
@@ -60,7 +67,10 @@
     [:div.control
      [:a.button.is-primary
       {:on-click login}
-      "Login"]]]])
+      "Login"]]]
+
+   (when (:login-error @state)
+     [:p "Please check your API key, couldn't log in"])])
 
 (defonce match (r/atom nil))
 
@@ -98,4 +108,8 @@
   (rd/render [layout] (.getElementById js/document "app")))
 
 (defn init []
-  (init!))
+  (let [api-key (.getItem js/localStorage "api-key")]
+    (init!)
+    (when api-key
+      (set-api-key api-key)
+      (login))))
