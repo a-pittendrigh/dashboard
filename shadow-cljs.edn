@@ -6,7 +6,11 @@
 
  :dependencies
  [[reagent "1.0.0"]
-  [cljs-http "0.1.46"]]
+  [cljs-http "0.1.46"]
+  ;;routing
+  [metosin/reitit "0.5.11"]
+  [metosin/reitit-spec "0.5.11"]
+  [metosin/reitit-frontend "0.5.11"]]
 
  :dev-http {8080 "public"}
  :builds

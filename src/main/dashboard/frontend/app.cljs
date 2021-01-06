@@ -3,7 +3,16 @@
   (:require [reagent.core :as r]
             [reagent.dom :as rd]
             [cljs-http.client :as http]
-            [cljs.core.async :refer [<!]]))
+            [cljs.core.async :refer [<!]]
+
+            [reitit.frontend :as rf]
+            [reitit.frontend.easy :as rfe]
+            [reitit.coercion.spec :as rss]
+
+            ;; [spec-tools.data-spec :as ds]
+            ;; [fipp.edn :as fedn]
+
+            ))
 
 (defonce state (r/atom {}))
 
@@ -26,6 +35,9 @@
   (let [url (with-api-key "https://api.torn.com/user/?selections=bars")
         response (get-request url)]))
 
+(defn dashboard-component []
+  [:p "Dahsboard"])
+
 (defn login-component []
   [:div
 
@@ -43,9 +55,41 @@
       {:on-click login}
       "Login"]]]])
 
+(defonce match (r/atom nil))
+
 (defn layout []
   [:div.container
-   [login-component]])
+   (if @match
+     (let [view (:view (:data @match))]
+       [view @match]))])
+
+(def routes
+  [["/"
+    {:name ::login
+     :view login-component}]
+
+    ["/dashboard"
+     {:name ::dashboard
+      :view dashboard-component}]
+
+   ;; ["/item/:id"
+   ;;  {:name ::item
+   ;;   :view item-page
+   ;;   :parameters {:path {:id int?}
+   ;;                :query {(ds/opt :foo) keyword?}}}]
+
+   ])
+
+
+
+(defn init! []
+  (rfe/start!
+   (rf/router routes {:data {:coercion rss/coercion}})
+   (fn [m] (reset! match m))
+   ;; set to false to enable HistoryAPI
+   {:use-fragment true})
+  (rd/render [layout] (.getElementById js/document "app")))
 
 (defn init []
-  (rd/render [layout] (.getElementById js/document "app")))
+  (init!)
+  #_(rd/render [layout] (.getElementById js/document "app")))
