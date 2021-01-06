@@ -22,14 +22,18 @@
 (defn with-api-key [url]
   (str url "&key=" (:api-key @state)))
 
+(defn ok? [response]
+  (= 200 (:status response)))
+
 (defn get-request [url]
   (go (let [response (<! (http/get url
                                     {:with-credentials? false
                                      ;;  :query-params {"since" 135}
                                      }
                                    ))]
-        (prn "status " (:status response))
-        (prn "body " (:body response)))))
+        (prn "body " (:body response))
+        (when (ok? response)
+          (rfe/replace-state ::dashboard)))))
 
 (defn login []
   (let [url (with-api-key "https://api.torn.com/user/?selections=bars")
@@ -91,5 +95,4 @@
   (rd/render [layout] (.getElementById js/document "app")))
 
 (defn init []
-  (init!)
-  #_(rd/render [layout] (.getElementById js/document "app")))
+  (init!))
