@@ -5,7 +5,8 @@
   "src/test"]
 
  :dependencies
- [[reagent "1.0.0"]]
+ [[reagent "1.0.0"]
+  [cljs-http "0.1.46"]]
 
  :dev-http {8080 "public"}
  :builds
