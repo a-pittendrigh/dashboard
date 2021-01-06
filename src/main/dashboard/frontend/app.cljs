@@ -5,13 +5,13 @@
             [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]))
 
-(defonce api-key (r/atom ""))
+(defonce state (r/atom {}))
 
 (defn set-api-key [key]
-  (reset! api-key key))
+  (swap! state assoc :api-key key))
 
-(defn with-api-key [url api-key]
-  (str url "&key=" api-key))
+(defn with-api-key [url]
+  (str url "&key=" (:api-key @state)))
 
 (defn get-request [url]
   (go (let [response (<! (http/get url
@@ -23,7 +23,7 @@
         (prn "body " (:body response)))))
 
 (defn login []
-  (let [url (with-api-key "https://api.torn.com/user/?selections=bars" @api-key)
+  (let [url (with-api-key "https://api.torn.com/user/?selections=bars")
         response (get-request url)]))
 
 (defn login-component []
