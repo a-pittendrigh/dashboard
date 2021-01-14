@@ -43,11 +43,42 @@
                        (set-api-key nil))]
     (get-request url login-successful login-failed)))
 
+(defn find-cheapest-item-in-list [list]
+  (->> list
+       (sort-by :cost)
+       (first)))
+
 (defn alcohol []
-  (let [url "https://api.torn.com/market/180?selections=bazaar,itemmarket"])
-  get-request
-  with-api-key
-  (:api-key @state)
+  (let [alcohol-item-id 180
+        url (str "https://api.torn.com/market/" alcohol-item-id "?selections=bazaar,itemmarket")]
+    (get-request url
+                 (fn [body]
+                   (swap! state assoc-in [:alcohol-prices alcohol-item-id] body)
+                   (prn body))
+                 (fn []
+                   (prn "fail"))))
+  )
+
+(comment
+  (alcohol)
+
+  (let [alcohol-item-id 180
+        cheapest-in-bazaar (-> (get-in @state [:alcohol-prices alcohol-item-id])
+                               :bazaar
+                               (find-cheapest-item-in-list))
+        cheapest-on-item-market (-> (get-in @state [:alcohol-prices alcohol-item-id])
+                                    :itemmarket
+                                    (find-cheapest-item-in-list))]
+
+    (find-cheapest-item-in-list [cheapest-in-bazaar cheapest-on-item-market]))
+
+  (let [url "https://api.torn.com/market/180?selections=bazaar,itemmarket"]
+    (get-request url
+                 (fn [body]
+                   (prn body))
+                 (fn []
+                   (prn "fail"))))
+
   )
 
 (defn dashboard-component []
