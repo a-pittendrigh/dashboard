@@ -59,11 +59,13 @@
 
     (find-cheapest-item-in-list [cheapest-in-bazaar cheapest-on-item-market])))
 
+(def alcohol-prices :alcohol-prices)
+
 (defn alcohol [alcohol-item-id]
   (let [url (str "https://api.torn.com/market/" alcohol-item-id "?selections=bazaar,itemmarket")]
     (get-request url
                  (fn [body]
-                   (swap! state assoc-in [:alcohol-prices alcohol-item-id] body)
+                   (swap! state assoc-in [alcohol-prices alcohol-item-id] body)
                    ;;(prn body)
                    )
                  (fn []
@@ -79,15 +81,15 @@
   ;; (get-all-alcohol-prices)
 
   (let [alcohol-item-id 180
-        cheapest-in-bazaar (-> (get-in @state [:alcohol-prices alcohol-item-id])
+        cheapest-in-bazaar (-> (get-in @state [alcohol-prices alcohol-item-id])
                                :bazaar
                                (find-cheapest-item-in-list))
-        cheapest-on-item-market (-> (get-in @state [:alcohol-prices alcohol-item-id])
+        cheapest-on-item-market (-> (get-in @state [alcohol-prices alcohol-item-id])
                                     :itemmarket
                                     (find-cheapest-item-in-list))]
 
     (find-cheapest-item-in-list [cheapest-in-bazaar cheapest-on-item-market])
-    (cheapest-in-bazaar-or-item-market-by-type-and-id :alcohol-prices alcohol-item-id))
+    (cheapest-in-bazaar-or-item-market-by-type-and-id alcohol-prices alcohol-item-id))
 
 
   (->> constants/alcohol
@@ -95,7 +97,7 @@
        (map (fn [item]
               (merge
                {:name (:name item)}
-               (cheapest-in-bazaar-or-item-market-by-type-and-id :alcohol-prices (:id item))))))
+               (cheapest-in-bazaar-or-item-market-by-type-and-id alcohol-prices (:id item))))))
 
   
 
