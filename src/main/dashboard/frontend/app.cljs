@@ -12,6 +12,8 @@
             ;; [spec-tools.data-spec :as ds]
             ;; [fipp.edn :as fedn]
 
+            [dashboard.frontend.constants :as constants]
+
             ))
 
 (defonce state (r/atom {}))
@@ -45,6 +47,9 @@
 (defn login []
   (let [url (with-api-key "https://api.torn.com/user/?selections=bars,profile")
         response (get-request url)]))
+
+(defn alcohol []
+  )
 
 (defn dashboard-component []
   ;; {:server_time 1609940746, :happy {:current 4745, :maximum 5025, :increment 5, :interval 900, :ticktime 854, :fulltime 50354}, :life {:current 4235, :maximum 4235, :increment 254, :interval 300, :ticktime 254, :fulltime 0}, :energy {:current 70, :maximum 150, :increment 5, :interval 600, :ticktime 254, :fulltime 9254}, :nerve {:current 33, :maximum 85, :increment 1, :interval 300, :ticktime 254, :fulltime 15554}, :chain {:current 0, :maximum 25000, :timeout 0, :modifier 1, :cooldown 0}}

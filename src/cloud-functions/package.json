@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/firestore": "4.8.1",
     "escape-html": "1.0.3"
   }
 }
