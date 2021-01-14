@@ -14,6 +14,6 @@
               {:id "551" :name "Bottle of Minty Mayhem"       :nerve 3 :cooldown-in-minutes 60}
               {:id "552" :name "Bottle of Mistletoe Madness"  :nerve 4 :cooldown-in-minutes 60}
               {:id "638" :name "Bottle of Christmas Cocktail" :nerve 3 :cooldown-in-minutes 60}
-              {:id "816" :name "Glass of Beer"                :nerve 2 :cooldown-in-minutes 60}
+              {:id "816" :name "Glass of Beer"                :nerve 2 :cooldown-in-minutes 60 :cannot-be-sold true}
               {:id "873" :name "Bottle of Green Stout"        :nerve 5 :cooldown-in-minutes 60}
               {:id "924" :name "Bottle of Christmas Spirit"   :nerve 5 :cooldown-in-minutes 60}])
