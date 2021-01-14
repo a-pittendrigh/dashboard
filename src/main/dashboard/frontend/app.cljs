@@ -22,33 +22,32 @@
   (swap! state assoc :api-key key)
   (.setItem js/localStorage "api-key" key))
 
-(defn with-api-key [url]
-  (str url "&key=" (:api-key @state)))
-
 (defn ok? [response]
   (= 200 (:status response)))
 
-(defn get-request [url]
-  (go (let [response (<! (http/get url
-                                    {:with-credentials? false
-                                     ;;  :query-params {"since" 135}
-                                     }
-                                   ))]
+(defn get-request [url on-success on-failure]
+  (go (let [response (<! (http/get url {:with-credentials? false
+                                        :query-params {"key" (:api-key @state)}}))]
         (if (ok? response)
-          (do
-            (prn "login successful")
-            (swap! state assoc :dashboard (:body response))
-            (swap! state assoc :login-error nil)
-            (rfe/replace-state ::dashboard))
-          (do
-            (swap! state assoc :login-error "API Key invalid")
-            (set-api-key nil))))))
+          (on-success (:body response))
+          (on-failure)))))
 
 (defn login []
-  (let [url (with-api-key "https://api.torn.com/user/?selections=bars,profile")
-        response (get-request url)]))
+  (let [url "https://api.torn.com/user/?selections=bars,profile"
+        login-successful (fn [body]
+                           (swap! state assoc :dashboard body)
+                           (swap! state assoc :login-error nil)
+                           (rfe/replace-state ::dashboard))
+        login-failed (fn []
+                       (swap! state assoc :login-error "API Key invalid")
+                       (set-api-key nil))]
+    (get-request url login-successful login-failed)))
 
 (defn alcohol []
+  (let [url "https://api.torn.com/market/180?selections=bazaar,itemmarket"])
+  get-request
+  with-api-key
+  (:api-key @state)
   )
 
 (defn dashboard-component []
