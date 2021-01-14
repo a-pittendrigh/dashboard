@@ -48,6 +48,17 @@
        (sort-by :cost)
        (first)))
 
+(defn cheapest-in-bazaar-or-item-market-by-type-and-id [type id]
+  (let [listings (get-in @state [type id])
+        cheapest-in-bazaar (-> listings
+                               :bazaar
+                               (find-cheapest-item-in-list))
+        cheapest-on-item-market (-> listings
+                                    :itemmarket
+                                    (find-cheapest-item-in-list))]
+
+    (find-cheapest-item-in-list [cheapest-in-bazaar cheapest-on-item-market])))
+
 (defn alcohol [alcohol-item-id]
   (let [url (str "https://api.torn.com/market/" alcohol-item-id "?selections=bazaar,itemmarket")]
     (get-request url
@@ -75,7 +86,16 @@
                                     :itemmarket
                                     (find-cheapest-item-in-list))]
 
-    (find-cheapest-item-in-list [cheapest-in-bazaar cheapest-on-item-market]))
+    (find-cheapest-item-in-list [cheapest-in-bazaar cheapest-on-item-market])
+    (cheapest-in-bazaar-or-item-market-by-type-and-id :alcohol-prices alcohol-item-id))
+
+
+  (->> constants/alcohol
+       (filter (fn [item] (not (true? (:cannot-be-sold item)))))
+       (map (fn [item]
+              (merge
+               {:name (:name item)}
+               (cheapest-in-bazaar-or-item-market-by-type-and-id :alcohol-prices (:id item))))))
 
   
 
