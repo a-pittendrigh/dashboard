@@ -65,7 +65,7 @@
   (let [url (str "https://api.torn.com/market/" alcohol-item-id "?selections=bazaar,itemmarket")]
     (get-request url
                  (fn [body]
-                   (swap! state assoc-in [alcohol-prices alcohol-item-id] body)
+                   (swap! state assoc-in [alcohol-prices alcohol-item-id] (merge body {:id alcohol-item-id}))
                    ;;(prn body)
                    )
                  (fn []
@@ -81,7 +81,8 @@
        (filter (fn [item] (not (true? (:cannot-be-sold item)))))
        (map (fn [item]
               (merge
-               {:name (:name item)
+               {:id (:id item)
+                :name (:name item)
                 :nerve (:nerve item)
                 :cooldown-in-minutes (:cooldown-in-minutes item)}
                (cheapest-in-bazaar-or-item-market-by-type-and-id alcohol-prices (:id item)))))))
@@ -135,7 +136,36 @@
 (defn dashboard-component []
   (let [dashboard (:dashboard @state)
         name (:name dashboard)]
-    [:p (str "Welcome, " name)]))
+    [:div
+     [:p (str "Welcome, " name)]
+     [:br]
+     [:h1 "Ratios for alchohol"]
+     [:table.table
+
+      [:thead
+       [:tr
+        [:th "Name"]
+        [:th "nerve"]
+        [:th "cooldown-in-minutes"]
+        [:th "nerve-to-dollar-ratio"]
+        [:th "nerve-to-cd-ratio"]
+        [:th "nerve-to-dollar-to-nerve-to-cd-ratio"]]]
+
+      [:tbody
+       (map
+        (fn [{:keys [id name nerve cooldown-in-minutes
+                     nerve-to-dollar-ratio nerve-to-cd-ratio
+                     nerve-to-dollar-to-nerve-to-cd-ratio]}]
+          [:tr {:key id}
+           [:td name]
+           [:td nerve]
+           [:td cooldown-in-minutes]
+           [:td nerve-to-dollar-ratio]
+           [:td nerve-to-cd-ratio]
+           [:td nerve-to-dollar-to-nerve-to-cd-ratio]])
+        (alcohol-ratios))]]]))
+
+
 
 (defn login-component []
   [:div
