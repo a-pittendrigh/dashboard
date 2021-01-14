@@ -76,6 +76,27 @@
    (map (fn [{id :id}]
           (alcohol id)))))
 
+(defn get-all-cheapest-alcohol-prices []
+  (->> constants/alcohol
+       (filter (fn [item] (not (true? (:cannot-be-sold item)))))
+       (map (fn [item]
+              (merge
+               {:name (:name item)
+                :nerve (:nerve item)
+                :cooldown-in-minutes (:cooldown-in-minutes item)}
+               (cheapest-in-bazaar-or-item-market-by-type-and-id alcohol-prices (:id item)))))))
+
+(defn alcohol-ratios []
+  (->> (get-all-cheapest-alcohol-prices)
+       (map (fn [item]
+              (let [nerve-to-dollar-ratio (/ (:cost item ) (:nerve item))
+                    nerve-to-cd-ratio     (/ (:cooldown-in-minutes item) (:nerve item))]
+                (merge item
+                       {:nerve-to-dollar-ratio nerve-to-dollar-ratio
+                        :nerve-to-cd-ratio nerve-to-cd-ratio
+                        :nerve-to-dollar-to-nerve-to-cd-ratio (/ nerve-to-dollar-ratio nerve-to-cd-ratio)}))))
+       (sort-by :nerve-to-cd-ratio)))
+
 (comment
   ;; (alcohol)
   ;; (get-all-alcohol-prices)
@@ -91,23 +112,30 @@
     (find-cheapest-item-in-list [cheapest-in-bazaar cheapest-on-item-market])
     (cheapest-in-bazaar-or-item-market-by-type-and-id alcohol-prices alcohol-item-id))
 
+  (->> (get-all-cheapest-alcohol-prices)
+       (map (fn [item]
+              (let [nerve-to-dollar-ratio (/ (:cost item ) (:nerve item))
+                    nerve-to-cd-ratio     (/ (:cooldown-in-minutes item) (:nerve item))]
+                (merge item
+                       {:nerve-to-dollar-ratio nerve-to-dollar-ratio
+                        :nerve-to-cd-ratio nerve-to-cd-ratio
+                        :nerve-to-dollar-to-nerve-to-cd-ratio (/ nerve-to-dollar-ratio nerve-to-cd-ratio)}))))
+       (sort-by :nerve-to-cd-ratio))
+
 
   (->> constants/alcohol
        (filter (fn [item] (not (true? (:cannot-be-sold item)))))
        (map (fn [item]
               (merge
-               {:name (:name item)}
-               (cheapest-in-bazaar-or-item-market-by-type-and-id alcohol-prices (:id item))))))
-
-  
-
-  )
+               {:name (:name item)
+                :nerve (:nerve item)
+                :cooldown-in-minutes (:cooldown-in-minutes item)}
+               (cheapest-in-bazaar-or-item-market-by-type-and-id alcohol-prices (:id item)))))))
 
 (defn dashboard-component []
-  ;; {:server_time 1609940746, :happy {:current 4745, :maximum 5025, :increment 5, :interval 900, :ticktime 854, :fulltime 50354}, :life {:current 4235, :maximum 4235, :increment 254, :interval 300, :ticktime 254, :fulltime 0}, :energy {:current 70, :maximum 150, :increment 5, :interval 600, :ticktime 254, :fulltime 9254}, :nerve {:current 33, :maximum 85, :increment 1, :interval 300, :ticktime 254, :fulltime 15554}, :chain {:current 0, :maximum 25000, :timeout 0, :modifier 1, :cooldown 0}}
   (let [dashboard (:dashboard @state)
         name (:name dashboard)]
-      [:p (str "Welcome, " name)]))
+    [:p (str "Welcome, " name)]))
 
 (defn login-component []
   [:div
