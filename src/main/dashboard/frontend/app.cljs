@@ -48,19 +48,24 @@
        (sort-by :cost)
        (first)))
 
-(defn alcohol []
-  (let [alcohol-item-id 180
-        url (str "https://api.torn.com/market/" alcohol-item-id "?selections=bazaar,itemmarket")]
+(defn alcohol [alcohol-item-id]
+  (let [url (str "https://api.torn.com/market/" alcohol-item-id "?selections=bazaar,itemmarket")]
     (get-request url
                  (fn [body]
                    (swap! state assoc-in [:alcohol-prices alcohol-item-id] body)
-                   (prn body))
+                   ;;(prn body)
+                   )
                  (fn []
-                   (prn "fail"))))
-  )
+                   (prn "fail")))))
+
+(defn get-all-alcohol-prices []
+  (->> constants/alcohol
+   (map (fn [{id :id}]
+          (alcohol id)))))
 
 (comment
-  (alcohol)
+  ;; (alcohol)
+  ;; (get-all-alcohol-prices)
 
   (let [alcohol-item-id 180
         cheapest-in-bazaar (-> (get-in @state [:alcohol-prices alcohol-item-id])
@@ -72,12 +77,7 @@
 
     (find-cheapest-item-in-list [cheapest-in-bazaar cheapest-on-item-market]))
 
-  (let [url "https://api.torn.com/market/180?selections=bazaar,itemmarket"]
-    (get-request url
-                 (fn [body]
-                   (prn body))
-                 (fn []
-                   (prn "fail"))))
+  
 
   )
 
