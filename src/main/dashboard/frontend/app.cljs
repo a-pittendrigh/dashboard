@@ -25,15 +25,18 @@
 (defn ok? [response]
   (= 200 (:status response)))
 
-(defn get-request [url on-success on-failure]
-  (go (let [response (<! (http/get url {:with-credentials? false
+(def base-url "https://api.torn.com/")
+
+(defn get-request [selection on-success on-failure]
+  (go (let [url (str base-url selection)
+            response (<! (http/get url {:with-credentials? false
                                         :query-params {"key" (:api-key @state)}}))]
         (if (ok? response)
           (on-success (:body response))
           (on-failure)))))
 
 (defn login []
-  (let [url "https://api.torn.com/user/?selections=bars,profile"
+  (let [url "user/?selections=bars,profile"
         login-successful (fn [body]
                            (swap! state assoc :dashboard body)
                            (swap! state assoc :login-error nil)
@@ -62,7 +65,7 @@
 (def alcohol-prices :alcohol-prices)
 
 (defn alcohol [alcohol-item-id]
-  (let [url (str "https://api.torn.com/market/" alcohol-item-id "?selections=bazaar,itemmarket")]
+  (let [url (str "market/" alcohol-item-id "?selections=bazaar,itemmarket")]
     (get-request url
                  (fn [body]
                    (swap! state assoc-in [alcohol-prices alcohol-item-id] (merge body {:id alcohol-item-id}))
@@ -231,10 +234,18 @@
 
 
 (defn get-faction-details []
-  )
+  (let [url "faction/?selections="]
+    (go
+      (<! (get-request url
+                       (fn [body] (-> body
+                                      :members
+                                      (first)
+                                      (prn)))
+                       (fn [] (prn "F") :fail)))
+      )))
 
 (defn get-user-details [user-id]
-  (let [url (str "https://api.torn.com/user/" user-id "?selections=crimes,personalstats")]
+  (let [url (str "user/" user-id "?selections=crimes,personalstats")]
     (go (<! (get-request url
                          (fn [body] (-> body
                                         :members
@@ -246,17 +257,7 @@
 
   (get-user-details 63064)
 
-  (go
-    (let [url "https://api.torn.com/faction/?selections="
-          bdy (<! (get-request url
-                               (fn [body] (-> body
-                                              :members
-                                              (first)
-                                              (prn)))
-                               (fn [] (prn "F") :fail)))]
-      bdy)
-
-    )
+  
 
   )
 
