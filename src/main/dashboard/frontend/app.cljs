@@ -228,3 +228,35 @@
     (when api-key
       (set-api-key api-key)
       (login))))
+
+
+(defn get-faction-details []
+  )
+
+(defn get-user-details [user-id]
+  (let [url (str "https://api.torn.com/user/" user-id "?selections=crimes,personalstats")]
+    (go (<! (get-request url
+                         (fn [body] (-> body
+                                        :members
+                                        (first)
+                                        (prn)))
+                         (fn [] (prn "F") :fail))))))
+
+(comment
+
+  (get-user-details 63064)
+
+  (go
+    (let [url "https://api.torn.com/faction/?selections="
+          bdy (<! (get-request url
+                               (fn [body] (-> body
+                                              :members
+                                              (first)
+                                              (prn)))
+                               (fn [] (prn "F") :fail)))]
+      bdy)
+
+    )
+
+  )
+
